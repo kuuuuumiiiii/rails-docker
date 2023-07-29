@@ -1,30 +1,44 @@
+# Docker Composeのバージョンを指定する
 version: '3'
 
 volumes:
   db-data:
 
 services:
+  # webコンテナの設定
   web:
+    # カレントディレクトリのDockerfileでビルドする
     build: .
+    # railsサーバーの起動時の設定を行う
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    # ポートの設定を行う(railsのデフォルトのポートは3000番)
     ports:
       - '3000:3000'
+    # カレントディレクトリのファイル・フォルダを/rails-dockerにマウントする
     volumes:
       - '.:/rails-docker'
+    # 環境変数の設定を行う
     environment:
       - 'DATABASE_PASSWORD=postgres'
+    # 出力をプリティーにする
     tty: true
+    # 標準入出力とエラー出力をコンテナと結びつける
     stdin_open: true
+    # コンテナの依存関係を指定する
     depends_on:
       - db
+    # リンクの指定をする
     links:
       - db
 
-
+  # データベースコンテナの設定
   db:
+    # postgresの12を指定する
     image: postgres:12
+    # db-dataを/var/lib/postgresql/dataにマウントして永続化させる
     volumes:
       - 'db-data:/var/lib/postgresql/data'
+    # 環境変数の設定をする
     environment:
       - 'POSTGRES_USER=postgres'
       - 'POSTGRES_PASSWORD=postgres'
